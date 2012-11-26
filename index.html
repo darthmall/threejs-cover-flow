@@ -41,7 +41,7 @@
 	var origin = new THREE.Vector3(0, 0, -250);
 	var objects = [];
 	var targets = [];
-	var selected = texts.length - 1;
+	var selected = 0;
 
 	var settings = new CoverFlow();
 	var gui = new dat.GUI();
@@ -116,7 +116,8 @@
 	document.getElementById('container').appendChild(renderer.domElement);
 	window.addEventListener('keydown', keyPress, true);
 
-	render();
+	selectCover(0);
+	animate();
 
 	function CoverFlow() {
 		this.cameraDistance = 760;
@@ -125,21 +126,39 @@
 		this.distance = 500;
 	}
 
-	function render() {
-		requestAnimationFrame(render);
+	function animate() {
+		requestAnimationFrame(animate);
 
 		camera.position.z = settings.cameraDistance;
+		TWEEN.update();
+	}
+
+	function render() {
+		renderer.render(scene, camera);
+	}
+
+	function selectCover() {
+		TWEEN.removeAll();
 
 		var i = objects.length;
 		while (--i >= 0) {
 			var object = objects[i];
-			var j = texts.length - 1 + selected - i;
+			var target = targets[texts.length - 1 + selected - i];
 
-			object.position = targets[j].position;
-			object.rotation = targets[j].rotation;
+			new TWEEN.Tween(object.position)
+					.to({ x: target.position.x, y: target.position.y, z: target.position.z }, 500)
+					.easing(TWEEN.Easing.Quadratic.InOut)
+					.start();
+
+			new TWEEN.Tween(object.rotation)
+					.to({ x: target.rotation.x, y: target.rotation.y, z: target.rotation.z }, 500)
+					.easing(TWEEN.Easing.Exponential.InOut)
+					.start();
 		}
 
-		renderer.render(scene, camera);
+		new TWEEN.Tween(this).to({}, 500)
+				.onUpdate(render)
+				.start();
 	}
 
 	function keyPress(evt) {
@@ -152,6 +171,8 @@
 				selected = Math.min(objects.length - 1, selected + 1);
 				break;
 		}
+
+		selectCover();
 	}
 
 	</script>
