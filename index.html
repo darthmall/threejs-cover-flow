@@ -62,25 +62,20 @@
 		['Tom Waits', 'Frank\'s Wild Years', 'franks_wild_years.jpg'],
 		['Arcade Fire', 'Funeral', 'funeral.jpg'],
 		['Los Lobos', 'How Will the Wolf Survive', 'how_will_the_wolf_survive.jpg'],
+		['Simon & Garfunkel', 'Wednesday Morning, 3AM', 'wednesday_morning_3_am.jpg'],
 		['Nirvana', 'In Utero', 'in_utero.jpg'],
 		['Oingo Boingo', 'Only a Lad', 'only_a_lad.jpg'],
 		['The Flaming Lips', 'The Soft Bulletin', 'the_soft_bulletin.png'],
-		['Explosions in the Sky', 'The Earth is Not a Cold Dead Place', 'the_earth_is_not_a_cold_dead_place.jpg'],
-		['Simon & Garfunkel', 'Wednesday Morning, 3AM', 'wednesday_morning_3_am.jpg']
+		['Explosions in the Sky', 'The Earth is Not a Cold Dead Place', 'the_earth_is_not_a_cold_dead_place.jpg']
 	];
 
 	var camera, scene, renderer;
 	var origin = new THREE.Vector3(0, 0, -250);
 	var objects = [];
 	var targets = [];
-	var selected = 0;
+	var selected = Math.floor(albums.length / 2);
 
 	var settings = new CoverFlow();
-	var gui = new dat.GUI();
-	gui.add(settings, 'cameraDistance', 1, 5000);
-	gui.add(settings, 'spacing', 1, 1000);
-	gui.add(settings, 'margin', 1, 1000);
-	gui.add(settings, 'distance', 1, 1000);
 
 	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000);
 	camera.position.z = settings.cameraDistance;
