@@ -40,6 +40,7 @@
 	var camera, scene, renderer;
 	var origin = new THREE.Vector3(0, 0, -250);
 	var objects = [];
+	var targets = [];
 	var selected = texts.length - 1;
 
 	var settings = new CoverFlow();
@@ -86,6 +87,29 @@
 		objects.push(object);
 	}
 
+	// Initialize all the possible target positions
+	var numTargets = texts.length * 2 - 1;
+	var centered = texts.length - 1;
+	for (i = 0; i < numTargets; i++) {
+		var object = new THREE.Object3D();
+		var j;
+
+		if (i < centered) {
+			j = centered - i;
+			object.position.set(-j * settings.spacing - settings.margin, 0, -settings.distance);
+			object.lookAt(origin);
+		} else if (i > centered) {
+			j = i - centered;
+			object.position.set(j * settings.spacing + settings.margin, 0, -settings.distance);
+			object.lookAt(origin);
+		} else {
+			object.position.set(0, 0, 0);
+			object.lookAt(new THREE.Vector3)
+		}
+
+		targets.push(object);
+	}
+
 	renderer = new THREE.CSS3DRenderer();
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	renderer.domElement.style.position = 'absolute';
@@ -108,14 +132,11 @@
 
 		var i = objects.length;
 		while (--i >= 0) {
-			var o = objects[i];
-			var j = selected - i;
+			var object = objects[i];
+			var j = texts.length - 1 + selected - i;
 
-			o.position.x = j * settings.spacing + ((j < 0) ? -settings.margin :
-								(j > 0) ? settings.margin :
-								0);
-			o.position.z = (j !== 0) ? -settings.distance : 0;
-			o.lookAt(((j === 0) ? new THREE.Vector3(0, 0, 0) : origin));
+			object.position = targets[j].position;
+			object.rotation = targets[j].rotation;
 		}
 
 		renderer.render(scene, camera);
