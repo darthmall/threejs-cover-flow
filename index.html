@@ -10,31 +10,63 @@
 	<style>
 	body {
 		background-color: #000;
+		font-family: sans-serif;
+		color: white;
+	}
+
+	footer {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		padding: 20px;
+		text-align: center;
 	}
 
 	.cover {
-		background-color: #fff;
-		padding: 20px;
-		width: 500px;
-		height: 500px;
+		width: 384px;
+		height: 384px;
 		box-shadow: 3px 3px 30px 5px #000;
 	}
+
+	.overlay {
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		left: 0;
+		padding: 20px;
+		background-color: rgba(0, 0, 0, 0.8);
+		opacity: 0;
+	}
+
+	.cover:hover .overlay {
+		opacity: 1;
+	}
+
 	</style>
 </head>
 <body>
 	<div id="container"></div>
+
+	<footer>
+		<p>User &larr; &amp; &rarr; to navigate. Hover over an album to view information. Album artwork by <a href="http://clipartcovers.tumblr.com/">Clipart Covers</a>.</p>
+	</footer>
 
 	<script src="js/three.min.js"></script>
 	<script src="js/CSS3DRenderer.js"></script>
 	<script src="js/tween.min.js"></script>
 	<script src="js/dat.gui.min.js"></script>
 	<script>
-	var texts = [
-		['Lorem Ipsum', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,'],
-		['Cicero', 'But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally'],
-		['Werther', 'A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine. I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single stroke at the present moment; and yet I feel that I never was a greater artist than now. When, while the lovely'],
-		['Kafka', 'One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff sections. The bedding was hardly able to cover it and seemed ready to slide off any moment. His many legs, pitifully thin compared with the size of the rest of him, waved about helplessly as he looked. "What\'s happened to me? " he thought. It wasn\'t a dream. His room, a proper human'],
-		['Pangrams', 'The quick, brown fox jumps over a lazy dog. DJs flock by when MTV ax quiz prog. Junk MTV quiz graced by fox whelps. Bawds jog, flick quartz, vex nymphs. Waltz, bad nymph, for quick jigs vex! Fox nymphs grab quick-jived waltz. Brick quiz whangs jumpy veldt fox. Bright vixens jump; dozy fowl quack. Quick wafting zephyrs vex bold Jim. Quick zephyrs blow, vexing daft Jim. Sex-charged fop blew my junk TV quiz. How quickly daft jumping zebras vex. Two driven jocks help fax my big quiz. Quick, Baz, get my woven flax jodhpurs! "Now fax quiz Jack! " my brave']
+	var albums = [
+		['Diana Ross and the Supremes', 'Anthology', 'anthology.jpg'],
+		['Tom Waits', 'Frank\'s Wild Years', 'franks_wild_years.jpg'],
+		['Arcade Fire', 'Funeral', 'funeral.jpg'],
+		['Los Lobos', 'How Will the Wolf Survive', 'how_will_the_wolf_survive.jpg'],
+		['Nirvana', 'In Utero', 'in_utero.jpg'],
+		['Oingo Boingo', 'Only a Lad', 'only_a_lad.jpg'],
+		['The Flaming Lips', 'The Soft Bulletin', 'the_soft_bulletin.png'],
+		['Explosions in the Sky', 'The Earth is Not a Cold Dead Place', 'the_earth_is_not_a_cold_dead_place.jpg'],
+		['Simon & Garfunkel', 'Wednesday Morning, 3AM', 'wednesday_morning_3_am.jpg']
 	];
 
 	var camera, scene, renderer;
@@ -55,19 +87,24 @@
 
 	scene = new THREE.Scene();
 
-	var i = texts.length;
+	var i = albums.length;
 	while (--i >= 0) {
 		var cover = document.createElement('div');
 		cover.className = 'cover';
-		cover.style.backgroundColor = '#fff';
+		cover.style.backgroundColor = 'white';
+		cover.style.backgroundImage = 'url(img/' + albums[i][2] + ')';
+
+		var overlay = document.createElement('div');
+		overlay.className = 'overlay';
+		cover.appendChild(overlay);
 
 		var title = document.createElement('h1');
-		title.textContent = texts[i][0];
-		cover.appendChild(title);
+		title.textContent = albums[i][1];
+		overlay.appendChild(title);
 
-		var copy = document.createElement('p');
-		copy.textContent = texts[i][1];
-		cover.appendChild(copy);
+		var copy = document.createElement('h2');
+		copy.textContent = albums[i][0];
+		overlay.appendChild(copy);
 
 		var object = new THREE.CSS3DObject(cover);
 
@@ -88,8 +125,8 @@
 	}
 
 	// Initialize all the possible target positions
-	var numTargets = texts.length * 2 - 1;
-	var centered = texts.length - 1;
+	var numTargets = albums.length * 2 - 1;
+	var centered = albums.length - 1;
 	for (i = 0; i < numTargets; i++) {
 		var object = new THREE.Object3D();
 		var j;
@@ -143,7 +180,7 @@
 		var i = objects.length;
 		while (--i >= 0) {
 			var object = objects[i];
-			var target = targets[texts.length - 1 + selected - i];
+			var target = targets[albums.length - 1 + selected - i];
 
 			new TWEEN.Tween(object.position)
 					.to({ x: target.position.x, y: target.position.y, z: target.position.z }, 500)
