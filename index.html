@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title>three.js css3d - cover flow</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width">
+
+	<style>
+	body {
+		background-color: #000;
+	}
+
+	.cover {
+		background-color: #fff;
+		padding: 20px;
+		width: 500px;
+		height: 500px;
+		box-shadow: 3px 3px 30px 5px #000;
+	}
+	</style>
+</head>
+<body>
+	<div id="container"></div>
+
+	<script src="js/three.min.js"></script>
+	<script src="js/CSS3DRenderer.js"></script>
+	<script src="js/tween.min.js"></script>
+	<script src="js/dat.gui.min.js"></script>
+	<script>
+	var texts = [
+		['Lorem Ipsum', 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a,'],
+		['Cicero', 'But I must explain to you how all this mistaken idea of denouncing pleasure and praising pain was born and I will give you a complete account of the system, and expound the actual teachings of the great explorer of the truth, the master-builder of human happiness. No one rejects, dislikes, or avoids pleasure itself, because it is pleasure, but because those who do not know how to pursue pleasure rationally encounter consequences that are extremely painful. Nor again is there anyone who loves or pursues or desires to obtain pain of itself, because it is pain, but because occasionally'],
+		['Werther', 'A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine. I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single stroke at the present moment; and yet I feel that I never was a greater artist than now. When, while the lovely'],
+		['Kafka', 'One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff sections. The bedding was hardly able to cover it and seemed ready to slide off any moment. His many legs, pitifully thin compared with the size of the rest of him, waved about helplessly as he looked. "What\'s happened to me? " he thought. It wasn\'t a dream. His room, a proper human'],
+		['Pangrams', 'The quick, brown fox jumps over a lazy dog. DJs flock by when MTV ax quiz prog. Junk MTV quiz graced by fox whelps. Bawds jog, flick quartz, vex nymphs. Waltz, bad nymph, for quick jigs vex! Fox nymphs grab quick-jived waltz. Brick quiz whangs jumpy veldt fox. Bright vixens jump; dozy fowl quack. Quick wafting zephyrs vex bold Jim. Quick zephyrs blow, vexing daft Jim. Sex-charged fop blew my junk TV quiz. How quickly daft jumping zebras vex. Two driven jocks help fax my big quiz. Quick, Baz, get my woven flax jodhpurs! "Now fax quiz Jack! " my brave']
+	];
+
+	var camera, scene, renderer;
+	var origin = new THREE.Vector3(0, 0, -250);
+	var objects = [];
+	var selected = texts.length - 1;
+
+	var settings = new CoverFlow();
+	var gui = new dat.GUI();
+	gui.add(settings, 'cameraDistance', 1, 5000);
+	gui.add(settings, 'spacing', 1, 1000);
+	gui.add(settings, 'margin', 1, 1000);
+	gui.add(settings, 'distance', 1, 1000);
+
+	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 5000);
+	camera.position.z = settings.cameraDistance;
+
+	scene = new THREE.Scene();
+
+	var i = texts.length;
+	while (--i >= 0) {
+		var cover = document.createElement('div');
+		cover.className = 'cover';
+		cover.style.backgroundColor = '#fff';
+
+		var title = document.createElement('h1');
+		title.textContent = texts[i][0];
+		cover.appendChild(title);
+
+		var copy = document.createElement('p');
+		copy.textContent = texts[i][1];
+		cover.appendChild(copy);
+
+		var object = new THREE.CSS3DObject(cover);
+
+		if (i === 0) {
+			object.position.x = 0;
+			object.position.z = 0;
+		} else {
+			object.position.x = settings.margin + i * settings.spacing;
+			object.position.z = -settings.distance;
+		}
+
+		object.position.y = 0;
+
+		object.lookAt(origin);
+
+		scene.add(object);
+		objects.push(object);
+	}
+
+	renderer = new THREE.CSS3DRenderer();
+	renderer.setSize(window.innerWidth, window.innerHeight);
+	renderer.domElement.style.position = 'absolute';
+	document.getElementById('container').appendChild(renderer.domElement);
+	window.addEventListener('keydown', keyPress, true);
+
+	render();
+
+	function CoverFlow() {
+		this.cameraDistance = 760;
+		this.spacing = 120;
+		this.margin = 600;
+		this.distance = 500;
+	}
+
+	function render() {
+		requestAnimationFrame(render);
+
+		camera.position.z = settings.cameraDistance;
+
+		var i = objects.length;
+		while (--i >= 0) {
+			var o = objects[i];
+			var j = selected - i;
+
+			o.position.x = j * settings.spacing + ((j < 0) ? -settings.margin :
+								(j > 0) ? settings.margin :
+								0);
+			o.position.z = (j !== 0) ? -settings.distance : 0;
+			o.lookAt(((j === 0) ? new THREE.Vector3(0, 0, 0) : origin));
+		}
+
+		renderer.render(scene, camera);
+	}
+
+	function keyPress(evt) {
+		switch (evt.keyIdentifier) {
+			case 'Left':
+				selected = Math.max(0, selected - 1);
+				break;
+
+			case 'Right':
+				selected = Math.min(objects.length - 1, selected + 1);
+				break;
+		}
+	}
+
+	</script>
+</body>
+</html>
